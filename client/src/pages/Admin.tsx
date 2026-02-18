@@ -36,7 +36,7 @@ const Admin = () => {
         }
 
         try {
-            await axios.post('http://localhost:3000/api/products', data);
+            await axios.post('http://localhost:3001/api/products', data);
             setIsModalOpen(false);
             setFormData({ name: '', price: '', description: '', specs: '{}' });
             setSelectedImages(null);
@@ -50,7 +50,7 @@ const Admin = () => {
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure?')) return;
         try {
-            await axios.delete(`http://localhost:3000/api/products/${id}`);
+            await axios.delete(`http://localhost:3001/api/products/${id}`);
             refetch();
         } catch (err) {
             alert('Failed to delete product');
@@ -73,7 +73,7 @@ const Admin = () => {
                 {products.map(product => (
                     <div key={product.id} className="glass p-4 rounded-xl flex items-center gap-4">
                         <img
-                            src={product.images[0]?.startsWith('/') ? `http://localhost:3000${product.images[0]}` : product.images[0]}
+                            src={product.images[0]?.startsWith('/') ? `http://localhost:3001${product.images[0]}` : product.images[0]}
                             className="w-12 h-12 rounded-lg object-cover"
                             alt=""
                         />

@@ -41,7 +41,7 @@ const ProductDetail = () => {
             {/* Hero / Gallery */}
             <div className="relative h-80 bg-black/5">
                 <img
-                    src={product.images[0]?.startsWith('/') ? `http://localhost:3000${product.images[0]}` : product.images[0]}
+                    src={product.images[0]?.startsWith('/') ? `http://localhost:3001${product.images[0]}` : product.images[0]}
                     alt={product.name}
                     className="w-full h-full object-contain"
                 />
@@ -85,7 +85,7 @@ const ProductDetail = () => {
                             {product.files.map((file, index) => (
                                 <a
                                     key={index}
-                                    href={`http://localhost:3000${file.url}`}
+                                    href={`http://localhost:3001${file.url}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-3 p-3 glass rounded-xl active:scale-95 transition-transform"
