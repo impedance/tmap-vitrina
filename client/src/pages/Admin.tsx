@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useProducts } from '../hooks/useProducts';
+import { Plus, Trash2, Package, X, Upload, Save, DollarSign, Type, FileJson } from 'lucide-react';
 import axios from 'axios';
-import { Plus, Trash2, Edit2, X, Upload } from 'lucide-react';
 
 const Admin = () => {
-    const { products, refetch } = useProducts();
+    const { products, loading, refetch } = useProducts();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -28,7 +28,6 @@ const Admin = () => {
                 data.append('images', selectedImages[i]);
             }
         }
-
         if (selectedFiles) {
             for (let i = 0; i < selectedFiles.length; i++) {
                 data.append('files', selectedFiles[i]);
@@ -43,7 +42,7 @@ const Admin = () => {
             setSelectedFiles(null);
             refetch();
         } catch (err) {
-            alert('Failed to save product');
+            alert('Failed to create product');
         }
     };
 
@@ -58,97 +57,169 @@ const Admin = () => {
     };
 
     return (
-        <div className="p-4">
-            <header className="flex justify-between items-center mb-6">
-                <h1 className="text-xl font-bold">Admin Dashboard</h1>
+        <div className="p-6 max-w-4xl mx-auto pb-20">
+            <header className="flex items-center justify-between mb-8">
+                <div>
+                    <h1 className="text-3xl font-black text-tg-text">Admin Panel</h1>
+                    <p className="text-sm text-tg-hint font-medium">Manage your boutique catalog</p>
+                </div>
                 <button
                     onClick={() => setIsModalOpen(true)}
-                    className="bg-[var(--tg-theme-button-color)] p-2 rounded-full text-white"
+                    className="bg-tg-button text-tg-button-text p-3 rounded-2xl shadow-lg active:scale-90 transition-transform flex items-center gap-2 font-bold"
                 >
-                    <Plus size={20} />
+                    <Plus size={24} />
+                    <span className="hidden sm:inline">Add Product</span>
                 </button>
             </header>
 
-            <div className="space-y-4">
-                {products.map(product => (
-                    <div key={product.id} className="glass p-4 rounded-xl flex items-center gap-4">
-                        <img
-                            src={product.images[0]?.startsWith('/') ? `http://localhost:3001${product.images[0]}` : product.images[0]}
-                            className="w-12 h-12 rounded-lg object-cover"
-                            alt=""
-                        />
-                        <div className="flex-1">
-                            <h3 className="font-bold truncate">{product.name}</h3>
-                            <p className="text-xs text-[var(--tg-theme-hint-color)]">${product.price}</p>
+            {loading ? (
+                <div className="flex justify-center py-20">
+                    <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-tg-button"></div>
+                </div>
+            ) : (
+                <div className="grid gap-4">
+                    {products.length === 0 && (
+                        <div className="text-center py-20 bg-tg-secondary-bg/50 rounded-3xl border-2 border-dashed border-tg-hint/20 text-tg-hint font-bold">
+                            No products to manage. Start by adding one!
                         </div>
-                        <div className="flex gap-2">
-                            <button className="p-2 text-blue-500"><Edit2 size={18} /></button>
-                            <button onClick={() => handleDelete(product.id)} className="p-2 text-red-500"><Trash2 size={18} /></button>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {isModalOpen && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4">
-                    <div className="bg-[var(--tg-theme-bg-color)] w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-lg font-bold">Add New Product</h2>
-                            <button onClick={() => setIsModalOpen(false)}><X /></button>
-                        </div>
-
-                        <form onSubmit={handleSubmit} className="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
-                            <input
-                                placeholder="Product Name"
-                                className="w-full p-4 glass rounded-xl outline-none border-0"
-                                value={formData.name}
-                                onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                required
-                            />
-                            <input
-                                placeholder="Price"
-                                type="number"
-                                step="0.01"
-                                className="w-full p-4 glass rounded-xl outline-none border-0"
-                                value={formData.price}
-                                onChange={e => setFormData({ ...formData, price: e.target.value })}
-                            />
-                            <textarea
-                                placeholder="Description"
-                                className="w-full p-4 glass rounded-xl outline-none border-0 h-32"
-                                value={formData.description}
-                                onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                required
-                            />
-                            <textarea
-                                placeholder='Specs JSON (e.g. {"Screen": "6.1 inch"})'
-                                className="w-full p-4 glass rounded-xl outline-none border-0 h-24 font-mono text-xs"
-                                value={formData.specs}
-                                onChange={e => setFormData({ ...formData, specs: e.target.value })}
-                            />
-
-                            <div className="flex flex-col gap-2">
-                                <label className="text-sm font-bold opacity-60">Photos</label>
-                                <input
-                                    type="file" multiple accept="image/*"
-                                    onChange={e => setSelectedImages(e.target.files)}
-                                />
+                    )}
+                    {products.map(product => (
+                        <div key={product.id} className="bg-tg-bg border border-tg-hint/10 p-5 rounded-2xl flex items-center gap-5 group hover:border-tg-button/30 transition-colors shadow-sm">
+                            <div className="w-16 h-16 rounded-xl bg-tg-secondary-bg flex items-center justify-center overflow-hidden flex-shrink-0">
+                                {product.images[0] ? (
+                                    <img
+                                        src={product.images[0].startsWith('/') ? `http://localhost:3001${product.images[0]}` : product.images[0]}
+                                        className="w-full h-full object-cover"
+                                        alt=""
+                                    />
+                                ) : (
+                                    <span className="text-2xl">📦</span>
+                                )}
                             </div>
+                            <div className="flex-1 min-w-0">
+                                <h3 className="font-black text-tg-text truncate text-lg uppercase tracking-tight">{product.name}</h3>
+                                <p className="text-tg-button font-black text-sm">${product.price?.toLocaleString() || '0'}</p>
+                            </div>
+                            <button
+                                onClick={() => handleDelete(product.id)}
+                                className="p-3 text-red-500 hover:bg-red-500/10 rounded-xl transition-all active:scale-95"
+                            >
+                                <Trash2 size={20} />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
 
-                            <div className="flex flex-col gap-2">
-                                <label className="text-sm font-bold opacity-60">Documents (PDF, etc.)</label>
-                                <input
-                                    type="file" multiple
-                                    onChange={e => setSelectedFiles(e.target.files)}
-                                />
+            {/* Modal */}
+            {isModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div
+                        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                        onClick={() => setIsModalOpen(false)}
+                    />
+                    <div className="bg-tg-bg w-full max-w-lg rounded-3xl shadow-2xl relative z-10 overflow-hidden border border-tg-hint/20">
+                        <div className="p-6 border-b border-tg-hint/10 flex items-center justify-between bg-tg-secondary-bg/30">
+                            <h2 className="text-xl font-black text-tg-text uppercase tracking-tighter">Add New Product</h2>
+                            <button onClick={() => setIsModalOpen(false)} className="text-tg-hint p-1">
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <form onSubmit={handleSubmit} className="p-8 space-y-6 max-h-[75vh] overflow-y-auto">
+                            <div className="space-y-4">
+                                <div className="relative">
+                                    <label className="text-xs font-black uppercase tracking-widest text-tg-hint ml-1 mb-1 block">Product Title</label>
+                                    <div className="flex items-center gap-3 bg-tg-secondary-bg/50 p-4 rounded-2xl border border-tg-hint/10 focus-within:border-tg-button transition-colors">
+                                        <Type size={18} className="text-tg-hint" />
+                                        <input
+                                            type="text"
+                                            placeholder="Enter name..."
+                                            className="bg-transparent outline-none w-full font-bold text-tg-text"
+                                            value={formData.name}
+                                            onChange={e => setFormData({ ...formData, name: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="relative">
+                                    <label className="text-xs font-black uppercase tracking-widest text-tg-hint ml-1 mb-1 block">Price (USD)</label>
+                                    <div className="flex items-center gap-3 bg-tg-secondary-bg/50 p-4 rounded-2xl border border-tg-hint/10 focus-within:border-tg-button transition-colors">
+                                        <DollarSign size={18} className="text-tg-hint" />
+                                        <input
+                                            type="number"
+                                            placeholder="0.00"
+                                            className="bg-transparent outline-none w-full font-bold text-tg-text"
+                                            value={formData.price}
+                                            onChange={e => setFormData({ ...formData, price: e.target.value })}
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="relative">
+                                    <label className="text-xs font-black uppercase tracking-widest text-tg-hint ml-1 mb-1 block">Description</label>
+                                    <textarea
+                                        placeholder="Tell about the product..."
+                                        className="w-full bg-tg-secondary-bg/50 p-4 rounded-2xl border border-tg-hint/10 focus:border-tg-button outline-none min-h-[120px] font-medium text-tg-text"
+                                        value={formData.description}
+                                        onChange={e => setFormData({ ...formData, description: e.target.value })}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="relative">
+                                    <label className="text-xs font-black uppercase tracking-widest text-tg-hint ml-1 mb-1 block">Specifications (JSON)</label>
+                                    <div className="flex items-center gap-3 bg-tg-secondary-bg/50 p-4 rounded-2xl border border-tg-hint/10 focus-within:border-tg-button transition-colors">
+                                        <FileJson size={18} className="text-tg-hint" />
+                                        <input
+                                            type="text"
+                                            className="bg-transparent outline-none w-full font-mono text-xs text-tg-text"
+                                            value={formData.specs}
+                                            onChange={e => setFormData({ ...formData, specs: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-black uppercase tracking-widest text-tg-hint ml-1 block">Images</label>
+                                        <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-tg-hint/20 rounded-2xl hover:border-tg-button/50 transition-colors cursor-pointer bg-tg-secondary-bg/20">
+                                            <Upload size={24} className="text-tg-button mb-2" />
+                                            <span className="text-[10px] font-black uppercase text-tg-hint text-center">Photos</span>
+                                            <input
+                                                type="file"
+                                                multiple
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={e => setSelectedImages(e.target.files)}
+                                            />
+                                        </label>
+                                        {selectedImages && <p className="text-[10px] font-bold text-center mt-1 text-tg-button uppercase tracking-tighter">{selectedImages.length} selected</p>}
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-black uppercase tracking-widest text-tg-hint ml-1 block">Files</label>
+                                        <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-tg-hint/20 rounded-2xl hover:border-tg-button/50 transition-colors cursor-pointer bg-tg-secondary-bg/20">
+                                            <Package size={24} className="text-tg-button mb-2" />
+                                            <span className="text-[10px] font-black uppercase text-tg-hint text-center">Docs</span>
+                                            <input
+                                                type="file"
+                                                multiple
+                                                className="hidden"
+                                                onChange={e => setSelectedFiles(e.target.files)}
+                                            />
+                                        </label>
+                                        {selectedFiles && <p className="text-[10px] font-bold text-center mt-1 text-tg-button uppercase tracking-tighter">{selectedFiles.length} selected</p>}
+                                    </div>
+                                </div>
                             </div>
 
                             <button
                                 type="submit"
-                                className="w-full bg-[var(--tg-theme-button-color)] text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2"
+                                className="w-full bg-tg-button text-tg-button-text py-5 rounded-2xl font-black text-lg flex items-center justify-center gap-3 shadow-xl active:scale-95 transition-all mt-4"
                             >
-                                <Upload size={18} />
-                                Save Product
+                                <Save size={24} />
+                                Publish Product
                             </button>
                         </form>
                     </div>
