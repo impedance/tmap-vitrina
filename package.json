@@ -1,0 +1,25 @@
+{
+  "name": "tmap-vitrina",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "install-all": "npm install && cd client && npm install && cd ../server && npm install",
+    "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
+    "build": "cd client && npm run build && cd ../server && npm run build",
+    "test": "cd server && npm test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@twa-dev/sdk": "^8.0.2",
+    "autoprefixer": "^10.4.24",
+    "axios": "^1.13.5",
+    "lucide-react": "^0.574.0",
+    "postcss": "^8.5.6",
+    "react-router-dom": "^7.13.0",
+    "tailwindcss": "^4.1.18"
+  }
+}
