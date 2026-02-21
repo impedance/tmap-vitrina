@@ -1,0 +1,172 @@
+import React, { useEffect, useState, useMemo } from 'react';
+import { Search, Filter, ShoppingCart } from 'lucide-react';
+import { useSearchParams, Link } from 'react-router-dom';
+import axios from 'axios';
+import { ProductCard } from '../components/catalog/ProductCard';
+import { Chip } from '../components/ui/Base';
+import { BottomSheet } from '../components/ui/BottomSheet';
+import { useCart } from '../store/CartStore';
+
+const API_URL = 'http://localhost:3001/api';
+
+const Catalog: React.FC = () => {
+    const [products, setProducts] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState('');
+    const [searchParams] = useSearchParams();
+    const isAdmin = searchParams.get('admin') === '1';
+    const { totalItems, totalAmount } = useCart();
+
+    // Filters state
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const res = await axios.get(`${API_URL}/products`);
+                setProducts(res.data);
+            } catch (err) {
+                console.error('Failed to fetch products', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProducts();
+    }, []);
+
+    const collections = useMemo(() => {
+        const all = products.map(p => p.collection).filter(Boolean);
+        return Array.from(new Set(all));
+    }, [products]);
+
+    const filteredProducts = useMemo(() => {
+        return products.filter(p => {
+            const matchSearch = p.title.toLowerCase().includes(search.toLowerCase());
+            const matchCollection = !selectedCollection || p.collection === selectedCollection;
+            return matchSearch && matchCollection;
+        });
+    }, [products, search, selectedCollection]);
+
+    if (loading) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+                <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                <p className="text-hint animate-pulse">Загрузка шедевров...</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="pb-24">
+            {/* Header */}
+            <header className="sticky top-0 z-50 bg-bg/80 backdrop-blur-md p-4 safe-p-top">
+                <div className="flex items-center gap-3 mb-4">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-hint" size={18} />
+                        <input
+                            type="text"
+                            placeholder="Поиск шоколада..."
+                            className="w-full bg-surface border-none rounded-m py-2 pl-10 pr-4 text-body focus:ring-2 focus:ring-primary transition-all outline-none"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                    </div>
+                    <button
+                        onClick={() => setIsFilterOpen(true)}
+                        className="p-2 rounded-m bg-surface text-text active:scale-90 transition-transform cursor-pointer"
+                    >
+                        <Filter size={20} />
+                    </button>
+                </div>
+
+                {/* Categories Chips */}
+                <div className="flex gap-2 overflow-x-auto no-scrollbar py-1">
+                    <Chip
+                        label="Все"
+                        active={!selectedCollection}
+                        onClick={() => setSelectedCollection(null)}
+                    />
+                    {collections.map(c => (
+                        <Chip
+                            key={c}
+                            label={c}
+                            active={selectedCollection === c}
+                            onClick={() => setSelectedCollection(c)}
+                        />
+                    ))}
+                </div>
+            </header>
+
+            {/* Grid */}
+            <main className="px-4 mt-2">
+                <div className="grid grid-cols-2 gap-3">
+                    {filteredProducts.map(product => (
+                        <ProductCard key={product.id} product={product} isAdmin={isAdmin} />
+                    ))}
+                </div>
+
+                {filteredProducts.length === 0 && (
+                    <div className="text-center py-20">
+                        <p className="text-hint">Ничего не нашли :(</p>
+                    </div>
+                )}
+            </main>
+
+            {/* Floating Cart Button */}
+            {totalItems > 0 && (
+                <div className="fixed bottom-6 left-4 right-4 z-40 animate-in slide-in-from-bottom-10 fade-in duration-300">
+                    <Link to="/cart" className="flex items-center justify-between bg-primary text-on-primary p-4 rounded-l shadow-xl shadow-primary/30 active:scale-95 transition-transform hover:brightness-110">
+                        <div className="flex items-center gap-3">
+                            <div className="relative">
+                                <ShoppingCart size={24} />
+                                <span className="absolute -top-2 -right-2 bg-accent text-on-primary text-[10px] w-5 h-5 flex items-center justify-center rounded-full font-bold border-2 border-primary">
+                                    {totalItems}
+                                </span>
+                            </div>
+                            <span className="font-bold text-body-plus">Корзина</span>
+                        </div>
+                        <span className="font-bold text-body-plus">{totalAmount} ₽</span>
+                    </Link>
+                </div>
+            )}
+
+            {/* Filters BottomSheet */}
+            <BottomSheet
+                isOpen={isFilterOpen}
+                onClose={() => setIsFilterOpen(false)}
+                title="Фильтры"
+            >
+                <div className="space-y-6">
+                    <div>
+                        <h3 className="text-body font-bold mb-3 font-semibold">Коллекции</h3>
+                        <div className="flex flex-wrap gap-2">
+                            <Chip
+                                label="Все"
+                                active={!selectedCollection}
+                                onClick={() => setSelectedCollection(null)}
+                            />
+                            {collections.map(c => (
+                                <Chip
+                                    key={c}
+                                    label={c}
+                                    active={selectedCollection === c}
+                                    onClick={() => setSelectedCollection(c)}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                    {/* Add more filters here later */}
+                    <button
+                        onClick={() => setIsFilterOpen(false)}
+                        className="w-full bg-primary text-on-primary py-4 rounded-l font-bold mt-4"
+                    >
+                        Применить
+                    </button>
+                </div>
+            </BottomSheet>
+        </div>
+    );
+};
+
+export default Catalog;

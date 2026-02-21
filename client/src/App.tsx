@@ -1,27 +1,24 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Showcase from './pages/Showcase';
-import ProductDetail from './pages/ProductDetail';
-import Admin from './pages/Admin';
-import WebApp from '@twa-dev/sdk';
-import { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Catalog from './pages/Catalog';
+import Product from './pages/Product';
+import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
 
 function App() {
-  useEffect(() => {
-    WebApp.ready();
-    WebApp.expand();
-  }, []);
-
   return (
     <Router>
-      <div className="min-h-screen bg-[var(--tg-theme-bg-color)] text-[var(--tg-theme-text-color)]">
-        <Routes>
-          <Route path="/" element={<Showcase />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
-          <Route path="/admin" element={<Admin />} />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/" element={<Catalog />} />
+        <Route path="/p/:id" element={<Product />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/checkout" element={<Checkout />} />
+        {/* Redirect old routes if any */}
+        <Route path="/product/:id" element={<Navigate to="/" replace />} />
+        <Route path="/admin" element={<Navigate to="/?admin=1" replace />} />
+      </Routes>
     </Router>
   );
 }
 
 export default App;
+

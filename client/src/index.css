@@ -1,34 +1,80 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-:root {
-  --tg-theme-bg-color: #ffffff;
-  --tg-theme-text-color: #000000;
-  --tg-theme-hint-color: #999999;
-  --tg-theme-link-color: #2481cc;
-  --tg-theme-button-color: #2481cc;
-  --tg-theme-button-text-color: #ffffff;
-  --tg-theme-secondary-bg-color: #efeff4;
+@theme {
+  /* Colors mapping - using Telegram theme variables as source of truth */
+  --color-bg: var(--tg-theme-bg-color, #ffffff);
+  --color-surface: var(--tg-theme-secondary-bg-color, #efeff4);
+  --color-text: var(--tg-theme-text-color, #000000);
+  --color-hint: var(--tg-theme-hint-color, #999999);
+  --color-link: var(--tg-theme-link-color, #2481cc);
+  --color-primary: var(--tg-theme-button-color, #2481cc);
+  --color-on-primary: var(--tg-theme-button-text-color, #ffffff);
+  --color-section-bg: var(--tg-theme-section-bg-color, #ffffff);
+  --color-accent: var(--tg-theme-accent-text-color, #2481cc);
+  --color-destructive: var(--tg-theme-destructive-text-color, #ff3b30);
+
+  /* Radius from tokens */
+  --radius-s: 10px;
+  --radius-m: 14px;
+  --radius-l: 18px;
+
+  /* Spacing from tokens (optional, Tailwind has good defaults but we can add bespoke ones) */
+  --spacing-t-4: 4px;
+  --spacing-t-8: 8px;
+  --spacing-t-12: 12px;
+  --spacing-t-16: 16px;
+  --spacing-t-24: 24px;
+
+  /* Typography */
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+
+  --text-body: 14px;
+  --text-body--line-height: 20px;
+
+  --text-body-plus: 16px;
+  --text-body-plus--line-height: 22px;
+
+  --text-h3: 20px;
+  --text-h3--line-height: 26px;
+  --text-h3--font-weight: 600;
+
+  --text-h2: 24px;
+  --text-h2--line-height: 30px;
+  --text-h2--font-weight: 700;
+
+  /* Shadow */
+  --shadow-card: 0 1px 6px rgba(0,0,0,0.08);
 }
 
-body {
-  background-color: var(--tg-theme-bg-color);
-  color: var(--tg-theme-text-color);
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  overflow-x: hidden;
-  margin: 0;
+@layer base {
+  body {
+    @apply bg-bg text-text font-sans antialiased;
+    margin: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Safe areas via viewport vars (bound by SDK) */
+  :root {
+    --safe-area-inset-top: var(--tg-viewport-safe-area-inset-top, 0px);
+    --safe-area-inset-bottom: var(--tg-viewport-safe-area-inset-bottom, 0px);
+    --safe-area-inset-left: var(--tg-viewport-safe-area-inset-left, 0px);
+    --safe-area-inset-right: var(--tg-viewport-safe-area-inset-right, 0px);
+  }
 }
 
 .glass {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(var(--color-bg), 0.7);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(var(--color-text), 0.1);
 }
 
-@media (prefers-color-scheme: dark) {
-  .glass {
-    background: rgba(20, 20, 20, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
+.safe-p-top {
+  padding-top: var(--safe-area-inset-top);
+}
+
+.safe-p-bottom {
+  padding-bottom: var(--safe-area-inset-bottom);
 }

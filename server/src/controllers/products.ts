@@ -8,9 +8,9 @@ export const getAllProducts = async (req: Request, res: Response) => {
         });
         res.json(products.map(p => ({
             ...p,
-            specs: JSON.parse(p.specs),
+            badges: JSON.parse(p.badges),
             images: JSON.parse(p.images),
-            files: JSON.parse(p.files)
+            features: JSON.parse(p.features)
         })));
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch products' });
@@ -18,17 +18,17 @@ export const getAllProducts = async (req: Request, res: Response) => {
 };
 
 export const getProductById = async (req: Request, res: Response) => {
-    const productId = req.params.id as string;
+    const { id } = req.params;
     try {
-        const product = await prisma.product.findUnique({ where: { id: productId } });
+        const product = await prisma.product.findUnique({ where: { id: id as string } });
         if (!product) {
             return res.status(404).json({ error: 'Product not found' });
         }
         res.json({
             ...product,
-            specs: JSON.parse(product.specs),
+            badges: JSON.parse(product.badges),
             images: JSON.parse(product.images),
-            files: JSON.parse(product.files)
+            features: JSON.parse(product.features)
         });
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch product' });
@@ -36,24 +36,29 @@ export const getProductById = async (req: Request, res: Response) => {
 };
 
 export const createProduct = async (req: Request, res: Response) => {
-    const { name, price, description, specs } = req.body;
+    const data = req.body;
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
     try {
         const imageUrls = files?.['images']?.map(f => `/uploads/${f.filename}`) || [];
-        const attachedFiles = files?.['files']?.map(f => ({
-            name: f.originalname,
-            url: `/uploads/${f.filename}`
-        })) || [];
 
         const product = await prisma.product.create({
             data: {
-                name: name as string,
-                price: price ? parseFloat(price as string) : null,
-                description: description as string,
-                specs: (specs as string) || '{}',
-                images: JSON.stringify(imageUrls),
-                files: JSON.stringify(attachedFiles)
+                title: data.title,
+                subtitle: data.subtitle,
+                price: parseFloat(data.price),
+                currency: data.currency || 'RUB',
+                weightLabel: data.weightLabel,
+                badges: data.badges || '[]',
+                images: data.images || JSON.stringify(imageUrls),
+                collection: data.collection,
+                features: data.features || '[]',
+                kind: data.kind,
+                description: data.description,
+                composition: data.composition,
+                storage: data.storage,
+                delivery: data.delivery,
+                inStock: data.inStock === 'true' || data.inStock === true
             }
         });
 
@@ -66,7 +71,7 @@ export const createProduct = async (req: Request, res: Response) => {
 
 export const updateProduct = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { name, price, description, specs } = req.body;
+    const data = req.body;
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
     try {
@@ -79,41 +84,41 @@ export const updateProduct = async (req: Request, res: Response) => {
             ? files['images'].map(f => `/uploads/${f.filename}`)
             : JSON.parse(existingProduct.images);
 
-        const attachedFiles = files?.['files']
-            ? files['files'].map(f => ({ name: f.originalname, url: `/uploads/${f.filename}` }))
-            : JSON.parse(existingProduct.files);
-
-        const productId = id as string;
-        const nameStr = name as string | undefined;
-        const priceStr = price as string | undefined;
-        const descriptionStr = description as string | undefined;
-        const specsStr = specs as string | undefined;
-
         const product = await prisma.product.update({
-            where: { id: productId },
+            where: { id: id as string },
             data: {
-                name: nameStr !== undefined ? nameStr : existingProduct.name,
-                price: priceStr !== undefined ? parseFloat(priceStr) : existingProduct.price,
-                description: descriptionStr !== undefined ? descriptionStr : existingProduct.description,
-                specs: specsStr !== undefined ? specsStr : existingProduct.specs,
-                images: JSON.stringify(imageUrls),
-                files: JSON.stringify(attachedFiles)
+                title: data.title !== undefined ? data.title : existingProduct.title,
+                subtitle: data.subtitle !== undefined ? data.subtitle : existingProduct.subtitle,
+                price: data.price !== undefined ? parseFloat(data.price) : existingProduct.price,
+                currency: data.currency !== undefined ? data.currency : existingProduct.currency,
+                weightLabel: data.weightLabel !== undefined ? data.weightLabel : existingProduct.weightLabel,
+                badges: data.badges !== undefined ? data.badges : existingProduct.badges,
+                images: data.images !== undefined ? data.images : JSON.stringify(imageUrls),
+                collection: data.collection !== undefined ? data.collection : existingProduct.collection,
+                features: data.features !== undefined ? data.features : existingProduct.features,
+                kind: data.kind !== undefined ? data.kind : existingProduct.kind,
+                description: data.description !== undefined ? data.description : existingProduct.description,
+                composition: data.composition !== undefined ? data.composition : existingProduct.composition,
+                storage: data.storage !== undefined ? data.storage : existingProduct.storage,
+                delivery: data.delivery !== undefined ? data.delivery : existingProduct.delivery,
+                inStock: data.inStock !== undefined ? (data.inStock === 'true' || data.inStock === true) : existingProduct.inStock
             }
         });
 
         res.json(product);
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: 'Failed to update product' });
     }
 };
 
 export const deleteProduct = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const productId = id as string;
     try {
-        await prisma.product.delete({ where: { id: productId } });
+        await prisma.product.delete({ where: { id: id as string } });
         res.status(204).send();
     } catch (error) {
         res.status(500).json({ error: 'Failed to delete product' });
     }
 };
+
