@@ -1,0 +1,102 @@
+{
+  "meta": {
+    "name": "TMA Shop DS",
+    "version": "0.1",
+    "source_ref": "https://amazingchoco.com/chocolate/53/"
+  },
+  "color": {
+    "bg": {
+      "value": "var(--tg-theme-bg-color)"
+    },
+    "surface": {
+      "value": "var(--tg-theme-secondary-bg-color)"
+    },
+    "text": {
+      "value": "var(--tg-theme-text-color)"
+    },
+    "hint": {
+      "value": "var(--tg-theme-hint-color)"
+    },
+    "link": {
+      "value": "var(--tg-theme-link-color)"
+    },
+    "primary": {
+      "value": "var(--tg-theme-button-color)"
+    },
+    "on_primary": {
+      "value": "var(--tg-theme-button-text-color)"
+    },
+    "section_bg": {
+      "value": "var(--tg-theme-section-bg-color)"
+    },
+    "accent_text": {
+      "value": "var(--tg-theme-accent-text-color)"
+    },
+    "destructive_text": {
+      "value": "var(--tg-theme-destructive-text-color)"
+    }
+  },
+  "radius": {
+    "s": {
+      "value": 10
+    },
+    "m": {
+      "value": 14
+    },
+    "l": {
+      "value": 18
+    }
+  },
+  "spacing": {
+    "4": {
+      "value": 4
+    },
+    "8": {
+      "value": 8
+    },
+    "12": {
+      "value": 12
+    },
+    "16": {
+      "value": 16
+    },
+    "24": {
+      "value": 24
+    }
+  },
+  "typography": {
+    "font_family": {
+      "value": "system-ui, -apple-system, Segoe UI, Roboto, Arial"
+    },
+    "caption": {
+      "size": 12,
+      "line_height": 16,
+      "weight": 400
+    },
+    "body": {
+      "size": 14,
+      "line_height": 20,
+      "weight": 400
+    },
+    "body_plus": {
+      "size": 16,
+      "line_height": 22,
+      "weight": 400
+    },
+    "h3": {
+      "size": 20,
+      "line_height": 26,
+      "weight": 600
+    },
+    "h2": {
+      "size": 24,
+      "line_height": 30,
+      "weight": 700
+    }
+  },
+  "shadow": {
+    "card_light": {
+      "value": "0 1px 6px rgba(0,0,0,0.08)"
+    }
+  }
+}
