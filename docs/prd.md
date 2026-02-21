@@ -30,17 +30,22 @@
 
 ---
 
-## 2) Технологии (рекомендованный стек)
+## 2) Технологии (обновленный стек)
 
 **Frontend**
 
-* React + TypeScript + Vite (или Next.js, если уже есть стартовый проект).
-* CSS: Tailwind или CSS Modules (главное — **завести токены** и использовать `--tg-theme-*`).
+* React 18 + TypeScript + Vite.
+* CSS: Tailwind CSS (v4) (токены заводятся как CSS-переменные и мапятся на `--tg-theme-*`).
 
 **Telegram SDK слой**
 
-* Использовать SDK, который умеет биндинг CSS vars темы/viewport (например `@tma/sdk`: функции по созданию и биндингу `--tg-theme-*` и viewport vars). ([JSR][1])
-* Поддержать чтение theme params через launch parameter `tgWebAppThemeParams` (на уровне понимания). ([docs.telegram-mini-apps.com][2])
+* Использовать современный SDK `@telegram-apps/sdk` (и `@telegram-apps/sdk-react`), который умеет биндинг CSS vars темы/viewport (функции по созданию и биндингу `--tg-theme-*` и viewport vars).
+* Поддержать чтение theme params через launch parameter `tgWebAppThemeParams` (на уровне понимания).
+
+**Backend**
+
+* Node.js + Express.
+* ORM: Prisma (используется для хранения товаров и заказов).
 
 ---
 
@@ -92,47 +97,46 @@
 
 ---
 
-## 5) “Изменять товары” (как сделать без админки и backend)
+## 5) Изменение товаров и заказы (Backend)
 
-Чтобы закрыть твоё “изменять их” в MVP:
-
-* Сделать **Admin mode** по query param `?admin=1` (или скрытый toggle 10 тапов по версии):
-
+* Для хранения товаров и заказов используется полноценный backend (Node.js + Express + Prisma), а не `localStorage`.
+* Сделать **Admin mode** в UI (по query param `?admin=1` или скрытый toggle 10 тапов по версии):
   * редактирование: `title`, `price`, `inStock`, `badges`, `weight`
-  * изменения сохранять в `localStorage` (поверх мок-данных).
+  * UI отправляет запросы на backend для сохранения изменений.
 * В обычном режиме админ-контролы скрыты.
 
 ---
 
-## 6) Данные (мок-API)
+## 6) Модели данных (Prisma)
 
-Сделать файл `src/data/products.seed.json` с полями:
+Схема для списка товаров будет реализована на стороне сервера через Prisma:
 
-```ts
-type Product = {
-  id: string;
-  title: string;
-  subtitle?: string;
-  price: number;
-  currency: "RUB";
-  weightLabel?: string; // "60 г", "1 кг"
-  badges?: string[]; // ["Vegan","Новинка"]
-  images: string[]; // /assets/products/...
-  collection?: string;
-  features?: string[];
-  kind?: string;
-  description?: string;
-  composition?: string;
-  storage?: string;
-  delivery?: string;
-  inStock?: boolean;
-};
+```prisma
+model Product {
+  id           String   @id @default(uuid())
+  title        String
+  subtitle     String?  @db.Text
+  price        Float
+  currency     String   @default("RUB")
+  weightLabel  String?  // "60 г", "1 кг"
+  badges       String[] // ["Vegan","Новинка"] (массив или JSON)
+  images       String[] // массив путей к картинкам
+  collection   String?
+  features     String[]
+  kind         String?
+  description  String?  @db.Text
+  composition  String?  @db.Text
+  storage      String?  @db.Text
+  delivery     String?  @db.Text
+  inStock      Boolean  @default(true)
+}
 ```
 
 Далее:
 
-* `GET /products` = чтение seed + override из localStorage (admin edits)
-* Корзина = localStorage (`cart:{productId: qty}`)
+* `GET /products` = запрос списка товаров с сервера (из БД).
+* Оформление заказа = `POST /orders` с передачей данных на сервер.
+* Корзина = сохранение выбранных позиций локально (`cart:{productId: qty}`), пока заказ не оформлен.
 
 ---
 
@@ -195,8 +199,8 @@ type Product = {
 4. Проверка:
 
 * работает добавление/удаление/изменение количества,
-* корзина переживает перезагрузку (localStorage),
-* checkout формирует payload и отправляет через `sendData` (в Telegram) / показывает JSON (в браузере).
+* корзина переживает перезагрузку, данные о товарах грузятся с сервера,
+* checkout сохраняет заказ через API (backend), затем опционально отправляет `sendData` (для закрытия WebApp в Telegram).
 
 ---
 
@@ -204,4 +208,4 @@ type Product = {
 
 * Реальная оплата (можно оставить “hook” на будущее).
 * Личный кабинет/история заказов (опционально как заглушка).
-* Настоящий backend и валидация initData (это уже следующая итерация; для production нужно валидировать init data на сервере). ([docs.telegram-mini-apps.com][8])
+* Сложная система ролей и авторизации (строгая валидация initData может быть реализована в базовом виде для защиты API).
