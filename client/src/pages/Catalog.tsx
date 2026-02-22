@@ -20,6 +20,8 @@ const Catalog: React.FC = () => {
     // Filters state
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
+    const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
+    const [selectedKinds, setSelectedKinds] = useState<string[]>([]);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -40,13 +42,33 @@ const Catalog: React.FC = () => {
         return Array.from(new Set(all));
     }, [products]);
 
+    const availableFeatures = useMemo(() => {
+        const all = products.flatMap(p => p.features || []);
+        return Array.from(new Set(all)).sort();
+    }, [products]);
+
+    const availableKinds = useMemo(() => {
+        const all = products.map(p => p.kind).filter(Boolean);
+        return Array.from(new Set(all)).sort();
+    }, [products]);
+
     const filteredProducts = useMemo(() => {
         return products.filter(p => {
             const matchSearch = p.title.toLowerCase().includes(search.toLowerCase());
             const matchCollection = !selectedCollection || p.collection === selectedCollection;
-            return matchSearch && matchCollection;
+            const matchFeatures = selectedFeatures.length === 0 || selectedFeatures.every(f => (p.features || []).includes(f));
+            const matchKind = selectedKinds.length === 0 || selectedKinds.includes(p.kind);
+            return matchSearch && matchCollection && matchFeatures && matchKind;
         });
-    }, [products, search, selectedCollection]);
+    }, [products, search, selectedCollection, selectedFeatures, selectedKinds]);
+
+    const toggleFeature = (f: string) => {
+        setSelectedFeatures(prev => prev.includes(f) ? prev.filter(item => item !== f) : [...prev, f]);
+    };
+
+    const toggleKind = (k: string) => {
+        setSelectedKinds(prev => prev.includes(k) ? prev.filter(item => item !== k) : [...prev, k]);
+    };
 
     if (loading) {
         return (
@@ -156,13 +178,49 @@ const Catalog: React.FC = () => {
                             ))}
                         </div>
                     </div>
-                    {/* Add more filters here later */}
-                    <button
-                        onClick={() => setIsFilterOpen(false)}
-                        className="w-full bg-primary text-on-primary py-4 rounded-l font-bold mt-4"
-                    >
-                        Применить
-                    </button>
+
+                    {availableFeatures.length > 0 && (
+                        <div>
+                            <h3 className="text-body font-bold mb-3 font-semibold">Особенности</h3>
+                            <div className="space-y-3">
+                                {availableFeatures.map(f => (
+                                    <label key={f} className="flex items-center gap-3 cursor-pointer">
+                                        <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${selectedFeatures.includes(f) ? 'bg-primary border-primary' : 'border-hint/50'}`}>
+                                            {selectedFeatures.includes(f) && <div className="w-2.5 h-2.5 bg-on-primary rounded-[1px]" />}
+                                        </div>
+                                        <span className="text-body select-none">{f}</span>
+                                        <input type="checkbox" className="hidden" checked={selectedFeatures.includes(f)} onChange={() => toggleFeature(f)} />
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    {availableKinds.length > 0 && (
+                        <div>
+                            <h3 className="text-body font-bold mb-3 font-semibold">Вид</h3>
+                            <div className="space-y-3">
+                                {availableKinds.map(k => (
+                                    <label key={k} className="flex items-center gap-3 cursor-pointer">
+                                        <div className={`w-5 h-5 rounded flex items-center justify-center border transition-colors ${selectedKinds.includes(k) ? 'bg-primary border-primary' : 'border-hint/50'}`}>
+                                            {selectedKinds.includes(k) && <div className="w-2.5 h-2.5 bg-on-primary rounded-[1px]" />}
+                                        </div>
+                                        <span className="text-body select-none">{k}</span>
+                                        <input type="checkbox" className="hidden" checked={selectedKinds.includes(k)} onChange={() => toggleKind(k)} />
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="sticky bottom-0 bg-bg pt-2 pb-safe-bottom">
+                        <button
+                            onClick={() => setIsFilterOpen(false)}
+                            className="w-full bg-primary text-on-primary py-4 rounded-l font-bold mt-2 shadow-card"
+                        >
+                            Показать результаты ({filteredProducts.length})
+                        </button>
+                    </div>
                 </div>
             </BottomSheet>
         </div>

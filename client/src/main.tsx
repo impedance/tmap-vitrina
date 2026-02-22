@@ -1,5 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { initTelegramAdapter } from './utils/telegramAdapter'
+// Initialize adapter BEFORE everything else
+initTelegramAdapter()
 import App from './App.tsx'
 import './index.css'
 import { TelegramProvider } from './components/TelegramProvider'

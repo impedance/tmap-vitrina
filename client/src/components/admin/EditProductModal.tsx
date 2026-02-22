@@ -18,6 +18,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ product, isO
         price: product.price,
         inStock: product.inStock,
         weightLabel: product.weightLabel || '',
+        badges: Array.isArray(product.badges) ? product.badges.join(', ') : '',
     });
     const [loading, setLoading] = useState(false);
 
@@ -25,7 +26,11 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ product, isO
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await axios.put(`${API_URL}/products/${product.id}`, form);
+            const payload = {
+                ...form,
+                badges: JSON.stringify(form.badges.split(',').map((b: string) => b.trim()).filter(Boolean))
+            };
+            const res = await axios.put(`${API_URL}/products/${product.id}`, payload);
             onUpdate(res.data);
             onClose();
         } catch (err) {
@@ -66,6 +71,16 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ product, isO
                             onChange={e => setForm({ ...form, weightLabel: e.target.value })}
                         />
                     </div>
+                </div>
+
+                <div className="space-y-1">
+                    <label className="text-caption text-hint ml-1">Бейджи (через запятую)</label>
+                    <input
+                        className="w-full bg-surface rounded-m p-3 text-body outline-none"
+                        value={form.badges}
+                        onChange={e => setForm({ ...form, badges: e.target.value })}
+                        placeholder="Vegan, Новинка"
+                    />
                 </div>
 
                 <div className="flex items-center justify-between p-3 bg-surface rounded-m">
