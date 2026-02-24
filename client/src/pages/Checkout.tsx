@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import { useCart } from '../store/CartStore';
 import { Button } from '../components/ui/Base';
 import { ChevronLeft, CheckCircle2, MapPin, Phone, User } from 'lucide-react';
 import { backButton, sendData } from '@telegram-apps/sdk';
+import { api } from '../utils/api';
 
-
-const API_URL = 'http://localhost:3001/api';
 
 const Checkout: React.FC = () => {
     const { items, totalAmount, clearCart } = useCart();
@@ -46,7 +44,7 @@ const Checkout: React.FC = () => {
         };
 
         try {
-            const res = await axios.post(`${API_URL}/orders`, orderData);
+            const res = await api.post('/orders', orderData);
             setOrderId(res.data.id);
             setIsSuccess(true);
             clearCart();

@@ -1,17 +1,23 @@
 import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
 
+const toProductResponse = (p: {
+    badges: string;
+    images: string;
+    features: string;
+}) => ({
+    ...p,
+    badges: JSON.parse(p.badges || '[]'),
+    images: JSON.parse(p.images || '[]'),
+    features: JSON.parse(p.features || '[]')
+});
+
 export const getAllProducts = async (req: Request, res: Response) => {
     try {
         const products = await prisma.product.findMany({
             orderBy: { createdAt: 'desc' }
         });
-        res.json(products.map(p => ({
-            ...p,
-            badges: JSON.parse(p.badges),
-            images: JSON.parse(p.images),
-            features: JSON.parse(p.features)
-        })));
+        res.json(products.map(toProductResponse));
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch products' });
     }
@@ -24,12 +30,7 @@ export const getProductById = async (req: Request, res: Response) => {
         if (!product) {
             return res.status(404).json({ error: 'Product not found' });
         }
-        res.json({
-            ...product,
-            badges: JSON.parse(product.badges),
-            images: JSON.parse(product.images),
-            features: JSON.parse(product.features)
-        });
+        res.json(toProductResponse(product));
     } catch (error) {
         res.status(500).json({ error: 'Failed to fetch product' });
     }
@@ -41,6 +42,7 @@ export const createProduct = async (req: Request, res: Response) => {
 
     try {
         const imageUrls = files?.['images']?.map(f => `/uploads/${f.filename}`) || [];
+        const inStock = data.inStock === undefined ? undefined : (data.inStock === 'true' || data.inStock === true);
 
         const product = await prisma.product.create({
             data: {
@@ -58,11 +60,11 @@ export const createProduct = async (req: Request, res: Response) => {
                 composition: data.composition,
                 storage: data.storage,
                 delivery: data.delivery,
-                inStock: data.inStock === 'true' || data.inStock === true
+                ...(inStock !== undefined ? { inStock } : {})
             }
         });
 
-        res.status(201).json(product);
+        res.status(201).json(toProductResponse(product));
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Failed to create product' });
@@ -105,7 +107,7 @@ export const updateProduct = async (req: Request, res: Response) => {
             }
         });
 
-        res.json(product);
+        res.json(toProductResponse(product));
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Failed to update product' });
@@ -121,4 +123,3 @@ export const deleteProduct = async (req: Request, res: Response) => {
         res.status(500).json({ error: 'Failed to delete product' });
     }
 };
-

@@ -65,12 +65,6 @@
   }
 }
 
-.glass {
-  background: rgba(var(--color-bg), 0.7);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(var(--color-text), 0.1);
-}
-
 .safe-p-top {
   padding-top: var(--safe-area-inset-top);
 }

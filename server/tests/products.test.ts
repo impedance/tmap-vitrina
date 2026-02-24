@@ -1,8 +1,41 @@
-import request from 'supertest';
-import app from '../src/app';
 import prisma from '../src/utils/prisma';
+import {
+    createProduct,
+    deleteProduct,
+    getAllProducts,
+    getProductById,
+    updateProduct
+} from '../src/controllers/products';
 
-describe('Products API (Black Box)', () => {
+type MockRes = {
+    statusCode: number;
+    body: any;
+    status: (code: number) => MockRes;
+    json: (payload: any) => MockRes;
+    send: (payload?: any) => MockRes;
+};
+
+const createMockRes = (): MockRes => {
+    const res: MockRes = {
+        statusCode: 200,
+        body: undefined,
+        status(code: number) {
+            res.statusCode = code;
+            return res;
+        },
+        json(payload: any) {
+            res.body = payload;
+            return res;
+        },
+        send(payload?: any) {
+            res.body = payload;
+            return res;
+        }
+    };
+    return res;
+};
+
+describe('Products controller', () => {
     beforeAll(async () => {
         await prisma.product.deleteMany();
     });
@@ -12,57 +45,91 @@ describe('Products API (Black Box)', () => {
     });
 
     it('should create a new product', async () => {
-        const res = await request(app)
-            .post('/api/products')
-            .field('name', 'Test Product')
-            .field('price', '99.99')
-            .field('description', 'Test Description')
-            .field('specs', JSON.stringify({ power: '100W' }));
+        const req: any = {
+            body: {
+                title: 'Test Product',
+                subtitle: 'Test Subtitle',
+                price: '99.99',
+                weightLabel: '100 г',
+                badges: JSON.stringify(['Новинка']),
+                features: JSON.stringify(['Vegan']),
+                images: JSON.stringify(['/assets/products/ashaninka.png']),
+                inStock: 'true',
+                description: 'Test Description'
+            },
+            files: undefined
+        };
+        const res = createMockRes();
 
-        expect(res.status).toBe(201);
+        await createProduct(req, res as any);
+
+        expect(res.statusCode).toBe(201);
         expect(res.body).toHaveProperty('id');
-        expect(res.body.name).toBe('Test Product');
+        expect(res.body.title).toBe('Test Product');
         expect(res.body.price).toBe(99.99);
+        expect(Array.isArray(res.body.badges)).toBe(true);
+        expect(res.body.inStock).toBe(true);
     });
 
     it('should get all products', async () => {
-        const res = await request(app).get('/api/products');
-        expect(res.status).toBe(200);
+        const req: any = {};
+        const res = createMockRes();
+
+        await getAllProducts(req, res as any);
+
+        expect(res.statusCode).toBe(200);
         expect(Array.isArray(res.body)).toBe(true);
         expect(res.body.length).toBeGreaterThan(0);
-        expect(res.body[0].name).toBe('Test Product');
+        expect(res.body[0].title).toBe('Test Product');
     });
 
     it('should get a product by id', async () => {
-        const productsRes = await request(app).get('/api/products');
-        const productId = productsRes.body[0].id;
+        const allRes = createMockRes();
+        await getAllProducts({} as any, allRes as any);
+        const productId = allRes.body[0].id as string;
 
-        const res = await request(app).get(`/api/products/${productId}`);
-        expect(res.status).toBe(200);
+        const req: any = { params: { id: productId } };
+        const res = createMockRes();
+
+        await getProductById(req, res as any);
+
+        expect(res.statusCode).toBe(200);
         expect(res.body.id).toBe(productId);
-        expect(res.body.name).toBe('Test Product');
+        expect(res.body.title).toBe('Test Product');
     });
 
     it('should update a product', async () => {
-        const productsRes = await request(app).get('/api/products');
-        const productId = productsRes.body[0].id;
+        const allRes = createMockRes();
+        await getAllProducts({} as any, allRes as any);
+        const productId = allRes.body[0].id as string;
 
-        const res = await request(app)
-            .put(`/api/products/${productId}`)
-            .field('name', 'Updated Product');
+        const req: any = {
+            params: { id: productId },
+            body: { title: 'Updated Product', inStock: 'false' },
+            files: undefined
+        };
+        const res = createMockRes();
 
-        expect(res.status).toBe(200);
-        expect(res.body.name).toBe('Updated Product');
+        await updateProduct(req, res as any);
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body.title).toBe('Updated Product');
+        expect(res.body.inStock).toBe(false);
     });
 
     it('should delete a product', async () => {
-        const productsRes = await request(app).get('/api/products');
-        const productId = productsRes.body[0].id;
+        const allRes = createMockRes();
+        await getAllProducts({} as any, allRes as any);
+        const productId = allRes.body[0].id as string;
 
-        const res = await request(app).delete(`/api/products/${productId}`);
-        expect(res.status).toBe(204);
+        const req: any = { params: { id: productId } };
+        const res = createMockRes();
 
-        const checkRes = await request(app).get(`/api/products/${productId}`);
-        expect(checkRes.status).toBe(404);
+        await deleteProduct(req, res as any);
+        expect(res.statusCode).toBe(204);
+
+        const checkRes = createMockRes();
+        await getProductById({ params: { id: productId } } as any, checkRes as any);
+        expect(checkRes.statusCode).toBe(404);
     });
 });

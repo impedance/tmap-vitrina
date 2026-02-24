@@ -1,3 +1,21 @@
+# PRD / План MVP
+
+## Актуальность (срез)
+
+Состояние репозитория на **2026-02-24** (ориентир: `main`, коммит `93e9bbe` от 2026-02-22):
+
+**Уже сделано**
+- Frontend: экраны `/` (каталог), `/p/:id` (товар), `/cart`, `/checkout`.
+- Каталог: поиск, фильтры (chips + bottom sheet), карточки товаров 2-в-ряд.
+- Корзина: stepper, удаление, сохранение в `localStorage`.
+- Оформление: `POST /api/orders` + `sendData(...)` при наличии Telegram контекста.
+- Admin mode: `?admin=1` + редактирование товара (через API `PUT /api/products/:id`).
+- Telegram: подключён `@telegram-apps/sdk` (theme params + viewport/safe-area + back button) + browser-stub (`client/src/utils/telegramAdapter.ts`).
+- Backend: Express + Prisma (SQLite), сид `server/prisma/seed.ts`.
+
+**Что ещё осталось сделать (крупное)**
+- Убрать/почистить legacy-код в `client/src` (есть старые типы/хуки/страницы, не используемые роутером).
+- Для прод-режима: базу API держать относительной (`/api/*`), а для нестандартных окружений — вынести в env (см. `VITE_API_URL`).
 
 ## 0) Цель MVP
 
@@ -26,7 +44,7 @@
 
 3. **Картинки**: `amazingchoco_images_from_page.zip`
 
-   * распаковать в `public/assets/products/…` и использовать в мок-каталоге.
+   * актуально сейчас: картинки уже лежат в `client/public/assets/products/…` и используются в сидировании `server/prisma/seed.ts`.
 
 ---
 
@@ -158,6 +176,11 @@ model Product {
   * если `window.Telegram?.WebApp` нет — создать stub (theme defaults, noop методов, fake initData).
 * В UI показывать бейдж “Browser mode”.
 
+## 8.1) Порты dev-окружения (актуально сейчас)
+
+- Backend: `http://localhost:3001` (см. `server/.env`, маршруты `/api/*`).
+- Frontend (Vite): `http://localhost:5174` (см. `client/vite.config.ts`).
+
 ---
 
 ## 9) Запуск и тест на iPhone (Telegram WebView)
@@ -184,9 +207,9 @@ model Product {
 
 * `README.md` с командами:
 
-  * `npm i`
-  * `npm run dev` (browser)
-  * `npm run build && npm run preview`
+  * установка/запуск dev (`make install`, `make dev`) + порты
+  * сидирование (`make seed`)
+  * сборка/запуск prod (`make build`, `node server/dist/index.js`)
   * деплой (Vercel/Netlify) + где вставить URL в BotFather
 
 2. Реализованные экраны + компоненты из спек-файла (минимум перечисленный выше).

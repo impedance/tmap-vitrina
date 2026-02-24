@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { BottomSheet } from '../ui/BottomSheet';
 import { Button } from '../ui/Base';
+import { api } from '../../utils/api';
 
 interface EditProductModalProps {
     product: any;
@@ -9,8 +9,6 @@ interface EditProductModalProps {
     onClose: () => void;
     onUpdate: (updatedProduct: any) => void;
 }
-
-const API_URL = 'http://localhost:3001/api';
 
 export const EditProductModal: React.FC<EditProductModalProps> = ({ product, isOpen, onClose, onUpdate }) => {
     const [form, setForm] = useState({
@@ -30,7 +28,7 @@ export const EditProductModal: React.FC<EditProductModalProps> = ({ product, isO
                 ...form,
                 badges: JSON.stringify(form.badges.split(',').map((b: string) => b.trim()).filter(Boolean))
             };
-            const res = await axios.put(`${API_URL}/products/${product.id}`, payload);
+            const res = await api.put(`/products/${product.id}`, payload);
             onUpdate(res.data);
             onClose();
         } catch (err) {

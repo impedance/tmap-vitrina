@@ -29,7 +29,7 @@ app.use((req, res, next) => {
             <div style="font-family: sans-serif; padding: 20px;">
                 <h1 style="color: #2481cc;">✅ API Backend is running!</h1> 
                 <p>Welcome to the <strong>tmap-vitrina</strong> backend.</p>
-                <p>If you are developing locally, the Frontend React app is likely running on <a href="http://localhost:5173">http://localhost:5173</a>.</p>
+                <p>If you are developing locally, the Frontend React app is likely running on <a href="http://localhost:5174">http://localhost:5174</a>.</p>
                 <p>In production, this port will serve both the API and the static frontend build.</p>
             </div>`);
         }

@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { backButton } from '@telegram-apps/sdk';
-import axios from 'axios';
 import { Button } from '../components/ui/Base';
 import { Stepper, Accordion } from '../components/ui/Controls';
 import { useCart } from '../store/CartStore';
 import { ChevronLeft, Share } from 'lucide-react';
-
-const API_URL = 'http://localhost:3001/api';
+import { api } from '../utils/api';
 
 const Product: React.FC = () => {
     const { id } = useParams();
@@ -20,7 +18,7 @@ const Product: React.FC = () => {
     useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const res = await axios.get(`${API_URL}/products/${id}`);
+                const res = await api.get(`/products/${id}`);
                 setProduct(res.data);
             } catch (err) {
                 console.error('Failed to fetch product', err);

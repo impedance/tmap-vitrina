@@ -1,13 +1,11 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { Search, Filter, ShoppingCart } from 'lucide-react';
 import { useSearchParams, Link } from 'react-router-dom';
-import axios from 'axios';
 import { ProductCard } from '../components/catalog/ProductCard';
 import { Chip } from '../components/ui/Base';
 import { BottomSheet } from '../components/ui/BottomSheet';
 import { useCart } from '../store/CartStore';
-
-const API_URL = 'http://localhost:3001/api';
+import { api } from '../utils/api';
 
 const Catalog: React.FC = () => {
     const [products, setProducts] = useState<any[]>([]);
@@ -26,7 +24,7 @@ const Catalog: React.FC = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const res = await axios.get(`${API_URL}/products`);
+                const res = await api.get('/products');
                 setProducts(res.data);
             } catch (err) {
                 console.error('Failed to fetch products', err);
