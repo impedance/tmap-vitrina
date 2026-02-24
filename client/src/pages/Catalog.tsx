@@ -20,6 +20,7 @@ const Catalog: React.FC = () => {
     const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
     const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
     const [selectedKinds, setSelectedKinds] = useState<string[]>([]);
+    const [sortType, setSortType] = useState<string>('popular');
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -51,14 +52,21 @@ const Catalog: React.FC = () => {
     }, [products]);
 
     const filteredProducts = useMemo(() => {
-        return products.filter(p => {
+        let result = products.filter(p => {
             const matchSearch = p.title.toLowerCase().includes(search.toLowerCase());
             const matchCollection = !selectedCollection || p.collection === selectedCollection;
             const matchFeatures = selectedFeatures.length === 0 || selectedFeatures.every(f => (p.features || []).includes(f));
             const matchKind = selectedKinds.length === 0 || selectedKinds.includes(p.kind);
             return matchSearch && matchCollection && matchFeatures && matchKind;
         });
-    }, [products, search, selectedCollection, selectedFeatures, selectedKinds]);
+
+        return result.sort((a, b) => {
+            if (sortType === 'price-asc') return a.price - b.price;
+            if (sortType === 'price-desc') return b.price - a.price;
+            if (sortType === 'newest') return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+            return 0; // 'popular' or default
+        });
+    }, [products, search, selectedCollection, selectedFeatures, selectedKinds, sortType]);
 
     const toggleFeature = (f: string) => {
         setSelectedFeatures(prev => prev.includes(f) ? prev.filter(item => item !== f) : [...prev, f]);
@@ -158,6 +166,16 @@ const Catalog: React.FC = () => {
                 title="Фильтры"
             >
                 <div className="space-y-6">
+                    <div>
+                        <h3 className="text-body font-bold mb-3 font-semibold">Сортировка</h3>
+                        <div className="flex flex-wrap gap-2">
+                            <Chip label="Сначала популярные" active={sortType === 'popular'} onClick={() => setSortType('popular')} />
+                            <Chip label="Сначала новинки" active={sortType === 'newest'} onClick={() => setSortType('newest')} />
+                            <Chip label="Сначала дешевые" active={sortType === 'price-asc'} onClick={() => setSortType('price-asc')} />
+                            <Chip label="Сначала дорогие" active={sortType === 'price-desc'} onClick={() => setSortType('price-desc')} />
+                        </div>
+                    </div>
+
                     <div>
                         <h3 className="text-body font-bold mb-3 font-semibold">Коллекции</h3>
                         <div className="flex flex-wrap gap-2">

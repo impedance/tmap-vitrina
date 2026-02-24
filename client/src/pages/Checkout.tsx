@@ -19,7 +19,8 @@ const Checkout: React.FC = () => {
         phone: '',
         address: '',
         comment: '',
-        deliveryMethod: 'курьер'
+        deliveryMethod: 'курьер',
+        paymentMethod: 'Оплата при получении'
     });
 
     React.useEffect(() => {
@@ -167,6 +168,15 @@ const Checkout: React.FC = () => {
                             value={form.comment}
                             onChange={e => setForm({ ...form, comment: e.target.value })}
                         />
+                    </div>
+
+                    <div className="bg-bg p-6 rounded-l space-y-5 shadow-card">
+                        <h3 className="text-body-plus font-bold mb-2">Оплата</h3>
+                        <div className="p-3 bg-surface rounded-m text-body font-bold border border-primary text-primary flex items-center justify-between opacity-80 cursor-not-allowed select-none">
+                            <span>Оплата при получении</span>
+                            <CheckCircle2 size={20} />
+                        </div>
+                        <p className="text-caption text-hint">Временно доступна только оплата при получении заказа.</p>
                     </div>
 
                     <div className="p-4 bg-primary/5 rounded-l border border-primary/10">

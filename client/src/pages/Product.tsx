@@ -6,6 +6,7 @@ import { Stepper, Accordion } from '../components/ui/Controls';
 import { useCart } from '../store/CartStore';
 import { ChevronLeft, Share } from 'lucide-react';
 import { api } from '../utils/api';
+import { ProductCard } from '../components/catalog/ProductCard';
 
 const Product: React.FC = () => {
     const { id } = useParams();
@@ -14,12 +15,22 @@ const Product: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [qty, setQty] = useState(1);
     const { addItem } = useCart();
+    const [similar, setSimilar] = useState<any[]>([]);
 
     useEffect(() => {
         const fetchProduct = async () => {
             try {
                 const res = await api.get(`/products/${id}`);
                 setProduct(res.data);
+
+                if (res.data.collection) {
+                    const allRes = await api.get(`/products`);
+                    const all = allRes.data;
+                    const sm = all.filter((p: any) => p.collection === res.data.collection && p.id !== res.data.id).slice(0, 4);
+                    setSimilar(sm);
+                } else {
+                    setSimilar([]);
+                }
             } catch (err) {
                 console.error('Failed to fetch product', err);
             } finally {
@@ -97,6 +108,19 @@ const Product: React.FC = () => {
                     {product.storage && <Accordion title="Хранение">{product.storage}</Accordion>}
                     {product.delivery && <Accordion title="Доставка">{product.delivery}</Accordion>}
                 </div>
+
+                {similar.length > 0 && (
+                    <div className="pt-8 -mx-6">
+                        <h2 className="text-h2 font-bold px-6 mb-4">Вам может понравиться</h2>
+                        <div className="flex gap-4 overflow-x-auto no-scrollbar px-6 pb-2">
+                            {similar.map(p => (
+                                <div key={p.id} className="min-w-[160px] flex-shrink-0">
+                                    <ProductCard product={p} isAdmin={false} />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* Action Bar */}

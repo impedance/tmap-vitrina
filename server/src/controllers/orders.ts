@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import prisma from '../utils/prisma';
 
 export const createOrder = async (req: Request, res: Response) => {
-    const { name, phone, address, comment, deliveryMethod, items, totalAmount } = req.body;
+    const { name, phone, address, comment, deliveryMethod, paymentMethod, items, totalAmount } = req.body;
 
     try {
         const order = await prisma.order.create({
@@ -12,6 +12,7 @@ export const createOrder = async (req: Request, res: Response) => {
                 address,
                 comment,
                 deliveryMethod,
+                paymentMethod,
                 items: JSON.stringify(items),
                 totalAmount: parseFloat(totalAmount),
                 status: 'pending'

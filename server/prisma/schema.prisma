@@ -38,6 +38,7 @@ model Order {
   address        String?
   comment        String?
   deliveryMethod String   // "самовывоз", "курьер"
+  paymentMethod  String?  // "Оплата при получении"
   items          String   // JSON: [{ productId: string, quantity: number, price: number }]
   totalAmount    Float
   status         String   @default("pending")
