@@ -1,16 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
-export interface CartItem {
-    id: string;
-    title: string;
-    price: number;
-    image: string;
-    quantity: number;
-}
+import { Product, CartItem } from '../types';
 
 interface CartContextType {
     items: Record<string, CartItem>;
-    addItem: (product: any, quantity?: number) => void;
+    addItem: (product: Product, quantity?: number) => void;
     removeItem: (productId: string) => void;
     updateQuantity: (productId: string, quantity: number) => void;
     clearCart: () => void;
@@ -30,7 +23,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('cart', JSON.stringify(items));
     }, [items]);
 
-    const addItem = (product: any, quantity: number = 1) => {
+    const addItem = (product: Product, quantity: number = 1) => {
         setItems(prev => {
             const existing = prev[product.id];
             if (existing) {

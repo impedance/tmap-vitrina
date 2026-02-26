@@ -7,15 +7,16 @@ import { useCart } from '../store/CartStore';
 import { ChevronLeft, Share } from 'lucide-react';
 import { api } from '../utils/api';
 import { ProductCard } from '../components/catalog/ProductCard';
+import { Product as ProductType } from '../types';
 
 const Product: React.FC = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const [product, setProduct] = useState<any>(null);
+    const [product, setProduct] = useState<ProductType | null>(null);
     const [loading, setLoading] = useState(true);
     const [qty, setQty] = useState(1);
     const { addItem } = useCart();
-    const [similar, setSimilar] = useState<any[]>([]);
+    const [similar, setSimilar] = useState<ProductType[]>([]);
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -26,7 +27,7 @@ const Product: React.FC = () => {
                 if (res.data.collection) {
                     const allRes = await api.get(`/products`);
                     const all = allRes.data;
-                    const sm = all.filter((p: any) => p.collection === res.data.collection && p.id !== res.data.id).slice(0, 4);
+                    const sm = all.filter((p: ProductType) => p.collection === res.data.collection && p.id !== res.data.id).slice(0, 4);
                     setSimilar(sm);
                 } else {
                     setSimilar([]);

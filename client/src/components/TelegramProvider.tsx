@@ -1,43 +1,104 @@
-import { useMemo, useEffect } from 'react';
-import { init, miniApp, viewport, themeParams, backButton } from '@telegram-apps/sdk';
-
-// Initialize the SDK
-try {
-    init();
-} catch (e) {
-    console.error('Failed to init Telegram SDK', e);
-}
+/**
+ * TelegramProvider — SDK v3 correct implementation
+ *
+ * Architecture:
+ * - init() is called in useEffect on mount. It returns a cleanup fn, which we return from
+ *   useEffect to run on unmount (React 18 Strict Mode calls this correctly).
+ * - We mount each component (miniApp, themeParams, viewport, backButton) only once, and
+ *   unmount them in the cleanup to prevent ConcurrentCallError on re-mount.
+ * - isTMA() from @telegram-apps/sdk detects the real Telegram environment.
+ *   In browser mode, mockTelegramEnv() (called in telegramAdapter.ts before this renders)
+ *   seeds the mock so init() won't throw LaunchParamsRetrieveError.
+ */
+import { useEffect, useRef } from 'react';
+import {
+    init,
+    isTMA,
+    mountMiniApp,
+    unmountMiniApp,
+    bindMiniAppCssVars,
+    mountThemeParams,
+    unmountThemeParams,
+    bindThemeParamsCssVars,
+    mountViewport,
+    unmountViewport,
+    bindViewportCssVars,
+    expandViewport,
+    mountBackButton,
+    unmountBackButton,
+} from '@telegram-apps/sdk';
 
 export const TelegramProvider = ({ children }: { children: React.ReactNode }) => {
-    const isTelegram = useMemo(() => {
-        return window.location.hash.includes('tgWebAppData') || window.location.search.includes('tgWebApp');
-    }, []);
+    const isTelegramEnv = isTMA();
+    const cleanupRef = useRef<VoidFunction | null>(null);
 
     useEffect(() => {
-        if (isTelegram) {
+        const setup = async () => {
             try {
-                // Mount components
-                if (miniApp.mount.isAvailable()) miniApp.mount();
-                if (themeParams.mount.isAvailable()) themeParams.mount();
-                if (viewport.mount.isAvailable()) {
-                    viewport.mount().then(() => {
-                        viewport.expand();
-                    }).catch(e => console.error('Viewport mount error', e));
+                // init() sets up event listeners & returns a cleanup function.
+                // Calling it with proper cleanup prevents double-registration in Strict Mode.
+                const cleanupInit = init({ acceptCustomStyles: true });
+                cleanupRef.current = cleanupInit;
+
+                // Mount components sequentially, each returns a signal promise.
+                // Using the named v3 functions prevents ConcurrentCallError because
+                // they incorporate internal mutex-like state checks.
+                if (mountMiniApp.isAvailable()) {
+                    await mountMiniApp();
+                    bindMiniAppCssVars();
                 }
 
-                if (backButton.mount.isAvailable()) {
-                    backButton.mount();
+                if (mountThemeParams.isAvailable()) {
+                    mountThemeParams();
+                    bindThemeParamsCssVars();
                 }
-            } catch (e) {
-                console.error('Error during Telegram SDK component mounting:', e);
+
+                if (mountViewport.isAvailable()) {
+                    await mountViewport();
+                    bindViewportCssVars();
+                    if (expandViewport.isAvailable()) {
+                        expandViewport();
+                    }
+                }
+
+                if (mountBackButton.isAvailable()) {
+                    mountBackButton();
+                }
+            } catch (err) {
+                console.error('[TMA] SDK setup error:', err);
             }
-        }
-    }, [isTelegram]);
+        };
+
+        setup();
+
+        return () => {
+            // Cleanup: unmount all components, then revoke init() listeners.
+            // Order matters: unmount before destroying the event bridge.
+            try {
+                unmountBackButton();
+            } catch { /* ignore */ }
+            try {
+                unmountViewport();
+            } catch { /* ignore */ }
+            try {
+                unmountThemeParams();
+            } catch { /* ignore */ }
+            try {
+                unmountMiniApp();
+            } catch { /* ignore */ }
+
+            // Call the cleanup returned by init() to remove event listeners.
+            if (cleanupRef.current) {
+                cleanupRef.current();
+                cleanupRef.current = null;
+            }
+        };
+    }, []); // Empty dep array: run once on mount, cleanup on unmount.
 
     return (
         <div className="min-h-screen bg-[var(--tg-theme-bg-color,white)] text-[var(--tg-theme-text-color,black)]">
             {children}
-            {!isTelegram && (
+            {!isTelegramEnv && (
                 <div className="fixed top-2 right-2 z-[9999] bg-yellow-400 text-black text-[10px] px-2 py-1 rounded font-bold shadow-md uppercase pointer-events-none">
                     Browser Mode
                 </div>

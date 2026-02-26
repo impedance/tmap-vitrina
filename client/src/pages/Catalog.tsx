@@ -6,9 +6,10 @@ import { Chip } from '../components/ui/Base';
 import { BottomSheet } from '../components/ui/BottomSheet';
 import { useCart } from '../store/CartStore';
 import { api } from '../utils/api';
+import { Product } from '../types';
 
 const Catalog: React.FC = () => {
-    const [products, setProducts] = useState<any[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [searchParams] = useSearchParams();
@@ -37,22 +38,22 @@ const Catalog: React.FC = () => {
     }, []);
 
     const collections = useMemo(() => {
-        const all = products.map(p => p.collection).filter(Boolean);
+        const all = products.map(p => p.collection).filter(Boolean) as string[];
         return Array.from(new Set(all));
     }, [products]);
 
     const availableFeatures = useMemo(() => {
-        const all = products.flatMap(p => p.features || []);
+        const all = products.flatMap(p => p.features || []).filter(Boolean) as string[];
         return Array.from(new Set(all)).sort();
     }, [products]);
 
     const availableKinds = useMemo(() => {
-        const all = products.map(p => p.kind).filter(Boolean);
+        const all = products.map(p => p.kind).filter(Boolean) as string[];
         return Array.from(new Set(all)).sort();
     }, [products]);
 
     const filteredProducts = useMemo(() => {
-        let result = products.filter(p => {
+        const result = products.filter(p => {
             const matchSearch = p.title.toLowerCase().includes(search.toLowerCase());
             const matchCollection = !selectedCollection || p.collection === selectedCollection;
             const matchFeatures = selectedFeatures.length === 0 || selectedFeatures.every(f => (p.features || []).includes(f));

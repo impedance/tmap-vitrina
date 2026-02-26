@@ -4,9 +4,10 @@ import { Badge } from '../ui/Base';
 import { useCart } from '../../store/CartStore';
 import { Link } from 'react-router-dom';
 import { EditProductModal } from '../admin/EditProductModal';
+import { Product } from '../../types';
 
 interface ProductCardProps {
-    product: any;
+    product: Product;
     isAdmin?: boolean;
 }
 

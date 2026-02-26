@@ -2,12 +2,13 @@ import React, { useState } from 'react';
 import { BottomSheet } from '../ui/BottomSheet';
 import { Button } from '../ui/Base';
 import { api } from '../../utils/api';
+import { Product } from '../../types';
 
 interface EditProductModalProps {
-    product: any;
+    product: Product;
     isOpen: boolean;
     onClose: () => void;
-    onUpdate: (updatedProduct: any) => void;
+    onUpdate: (updatedProduct: Product) => void;
 }
 
 export const EditProductModal: React.FC<EditProductModalProps> = ({ product, isOpen, onClose, onUpdate }) => {

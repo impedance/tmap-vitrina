@@ -1,13 +1,35 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React + TS</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <title>Vite + React + TS</title>
+  <script>
+    window.addEventListener('error', function (event) {
+      var err = document.createElement('div');
+      err.style.cssText = 'position:fixed;top:0;left:0;right:0;background:red;color:white;z-index:9999;padding:10px;font-size:12px;max-height:50vh;overflow:auto;word-wrap:break-word;';
+      err.innerText = 'Error: ' + event.message + '\nFile:' + event.filename + ':' + event.lineno;
+      if (event.error && event.error.stack) err.innerText += '\nStack: ' + event.error.stack;
+      document.body.appendChild(err);
+    });
+    window.addEventListener('unhandledrejection', function (event) {
+      var err = document.createElement('div');
+      err.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:orange;color:white;z-index:9999;padding:10px;font-size:12px;max-height:50vh;overflow:auto;word-wrap:break-word;';
+      err.innerText = 'Unhandled Rejection: ' + (event.reason && event.reason.message ? event.reason.message : event.reason);
+      if (event.reason && event.reason.stack) err.innerText += '\nStack: ' + event.reason.stack;
+      document.body.appendChild(err);
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>eruda.init();</script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+</body>
+
 </html>

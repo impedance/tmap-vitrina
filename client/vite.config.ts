@@ -7,6 +7,16 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    {
+      name: 'log-request',
+      configureServer(server) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        server.middlewares.use((req: any, res, next) => {
+          console.log(`[Vite] ${new Date().toISOString()} | ${req.method} ${req.url} | UA: ${req.headers['user-agent']}`);
+          next();
+        });
+      }
+    }
   ],
   server: {
     port: 5174,
