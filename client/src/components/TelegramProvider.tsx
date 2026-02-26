@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
     init,
     isTMA,
@@ -13,8 +13,12 @@ export const TelegramProvider = ({ children }: { children: React.ReactNode }) =>
     // We can use isTMA() directly since it checks the environment synchronous.
     const isTelegramEnv = isTMA();
     const [isReady, setIsReady] = useState(false);
+    const didInit = useRef(false);
 
     useEffect(() => {
+        if (didInit.current) return;
+        didInit.current = true;
+
         const setup = async () => {
             try {
                 // init() sets up event listeners.
