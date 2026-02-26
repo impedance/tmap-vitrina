@@ -1,0 +1,32 @@
+services:
+  # ─── Monolithic dev container: Vite (port 5174) + Express (port 3002) ───────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      # Mount the entire project so HMR and ts-node-dev see live changes.
+      # node_modules inside the container are preserved via anonymous volumes so
+      # they are NOT overwritten by the host (which may be a different OS/arch).
+      - .:/app
+      - /app/node_modules
+      - /app/client/node_modules
+      - /app/server/node_modules
+    environment:
+      # Vite needs this to accept connections from outside the container
+      - VITE_HOST=0.0.0.0
+      # SQLite lives inside the container volume; adjust for Postgres later
+      - DATABASE_URL=file:./dev.db
+      - PORT=3002
+      - NODE_ENV=development
+    ports:
+      - "5174:5174"   # Vite dev server (frontend)
+      - "3002:3002"   # Express API (backend)
+
+  # ─── Cloudflare Quick Tunnel → exposes Vite frontend via HTTPS ──────────────
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate --url http://app:5174
+    depends_on:
+      - app
+    restart: unless-stopped

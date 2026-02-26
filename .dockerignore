@@ -1,0 +1,26 @@
+# Don't copy host node_modules into the image build context —
+# they are installed fresh inside the image and preserved via Docker volumes.
+node_modules
+**/node_modules
+
+# Build artefacts
+dist
+client/dist
+server/dist
+
+# Prisma SQLite DB (mounted at runtime via volume)
+server/dev.db
+server/dev.db-journal
+server/dev.db-wal
+
+# Docs & samples
+docs
+samples
+
+# Git
+.git
+.gitignore
+
+# Misc
+*.log
+.DS_Store

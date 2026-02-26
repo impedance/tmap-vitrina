@@ -1,0 +1,27 @@
+FROM node:22-alpine
+
+# System tools: bash for the entrypoint script
+RUN apk add --no-cache bash
+
+WORKDIR /app
+
+# ── Install root-level deps (concurrently) ──────────────────────────────────
+COPY package.json package-lock.json* ./
+RUN npm ci --ignore-scripts
+
+# ── Install client deps ──────────────────────────────────────────────────────
+COPY client/package.json client/package-lock.json* ./client/
+RUN npm ci --prefix client --ignore-scripts
+
+# ── Install server deps ──────────────────────────────────────────────────────
+COPY server/package.json server/package-lock.json* ./server/
+RUN npm ci --prefix server --ignore-scripts
+
+# ── Entrypoint script is copied below ───────────────────────────────────────
+COPY docker/entrypoint.dev.sh /entrypoint.dev.sh
+RUN chmod +x /entrypoint.dev.sh
+
+# Ports: Vite (5174) + Express API (3002)
+EXPOSE 5174 3002
+
+ENTRYPOINT ["/entrypoint.dev.sh"]
