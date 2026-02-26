@@ -30,6 +30,9 @@ export default defineConfig({
     host: '0.0.0.0',
     // Allow any host, including the random *.trycloudflare.com URLs
     allowedHosts: true,
+    hmr: {
+      overlay: false,
+    },
     proxy: {
       // Inside the Docker network both services run in the same container,
       // so 'localhost' resolves correctly. When switching to a multi-container

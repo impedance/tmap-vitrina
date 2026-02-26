@@ -25,14 +25,14 @@ export const TelegramProvider = ({ children }: { children: React.ReactNode }) =>
                 init({ acceptCustomStyles: true });
 
                 // Mount components sequentially and securely checking state
-                if (miniApp.mount.isAvailable() && !miniApp.isMounted()) {
+                if (miniApp.mount.isAvailable() && !miniApp.isMounted() && !miniApp.isMounting()) {
                     miniApp.mount();
                 }
                 if (miniApp.bindCssVars.isAvailable()) {
                     miniApp.bindCssVars();
                 }
 
-                if (themeParams.mount.isAvailable() && !themeParams.isMounted()) {
+                if (themeParams.mount.isAvailable() && !themeParams.isMounted() && !themeParams.isMounting()) {
                     themeParams.mount();
                 }
                 if (themeParams.bindCssVars.isAvailable()) {
