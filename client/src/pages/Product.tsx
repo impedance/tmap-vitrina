@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { backButton } from '@telegram-apps/sdk';
+import { backButton } from '@telegram-apps/sdk-react';
 import { Button } from '../components/ui/Base';
 import { Stepper, Accordion } from '../components/ui/Controls';
 import { useCart } from '../store/CartStore';
@@ -41,14 +41,18 @@ const Product: React.FC = () => {
         fetchProduct();
 
         // Show Back Button in Telegram
-        if (backButton.show.isAvailable()) {
+        let off: VoidFunction | undefined;
+        if (backButton.isSupported() && backButton.isMounted()) {
             backButton.show();
-            const off = backButton.onClick(() => navigate(-1));
-            return () => {
-                off();
-                backButton.hide();
-            };
+            off = backButton.onClick(() => navigate(-1));
         }
+
+        return () => {
+            if (off) off();
+            if (backButton.isSupported() && backButton.isMounted()) {
+                backButton.hide();
+            }
+        };
     }, [id, navigate]);
 
     if (loading) return null;

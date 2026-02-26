@@ -57,7 +57,7 @@ const Catalog: React.FC = () => {
             const matchSearch = p.title.toLowerCase().includes(search.toLowerCase());
             const matchCollection = !selectedCollection || p.collection === selectedCollection;
             const matchFeatures = selectedFeatures.length === 0 || selectedFeatures.every(f => (p.features || []).includes(f));
-            const matchKind = selectedKinds.length === 0 || selectedKinds.includes(p.kind);
+            const matchKind = selectedKinds.length === 0 || (p.kind !== undefined && selectedKinds.includes(p.kind));
             return matchSearch && matchCollection && matchFeatures && matchKind;
         });
 

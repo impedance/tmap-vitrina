@@ -4,7 +4,7 @@ import { Trash2, ChevronLeft, ShoppingBag } from 'lucide-react';
 import { useCart } from '../store/CartStore';
 import { Stepper } from '../components/ui/Controls';
 import { Button } from '../components/ui/Base';
-import { backButton } from '@telegram-apps/sdk';
+import { backButton } from '@telegram-apps/sdk-react';
 
 const Cart: React.FC = () => {
     const { items, updateQuantity, removeItem, totalAmount, totalItems } = useCart();
@@ -12,14 +12,18 @@ const Cart: React.FC = () => {
     const itemList = Object.values(items);
 
     React.useEffect(() => {
-        if (backButton.show.isAvailable()) {
+        let off: VoidFunction | undefined;
+        if (backButton.isSupported() && backButton.isMounted()) {
             backButton.show();
-            const off = backButton.onClick(() => navigate(-1));
-            return () => {
-                off();
-                backButton.hide();
-            };
+            off = backButton.onClick(() => navigate(-1));
         }
+
+        return () => {
+            if (off) off();
+            if (backButton.isSupported() && backButton.isMounted()) {
+                backButton.hide();
+            }
+        };
     }, [navigate]);
 
     if (totalItems === 0) {

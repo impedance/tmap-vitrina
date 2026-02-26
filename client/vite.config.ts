@@ -11,7 +11,8 @@ export default defineConfig({
       name: 'log-request',
       configureServer(server) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        server.middlewares.use((req: any, res, next) => {
+        server.middlewares.use((req: any, _res, next) => {
+          // @ts-ignore
           console.log(`[Vite] ${new Date().toISOString()} | ${req.method} ${req.url} | UA: ${req.headers['user-agent']}`);
           next();
         });

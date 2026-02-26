@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useCart } from '../store/CartStore';
 import { Button } from '../components/ui/Base';
 import { ChevronLeft, CheckCircle2, MapPin, Phone, User } from 'lucide-react';
-import { backButton, sendData } from '@telegram-apps/sdk';
+import { sendData } from '@telegram-apps/sdk';
+import { backButton } from '@telegram-apps/sdk-react';
 import { api } from '../utils/api';
 
 
@@ -24,14 +25,18 @@ const Checkout: React.FC = () => {
     });
 
     React.useEffect(() => {
-        if (backButton.show.isAvailable()) {
+        let off: VoidFunction | undefined;
+        if (backButton.isSupported() && backButton.isMounted()) {
             backButton.show();
-            const off = backButton.onClick(() => navigate(-1));
-            return () => {
-                off();
-                backButton.hide();
-            };
+            off = backButton.onClick(() => navigate(-1));
         }
+
+        return () => {
+            if (off) off();
+            if (backButton.isSupported() && backButton.isMounted()) {
+                backButton.hide();
+            }
+        };
     }, [navigate]);
 
     const handleSubmit = async (e: React.FormEvent) => {
