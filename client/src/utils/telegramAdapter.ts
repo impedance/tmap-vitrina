@@ -10,8 +10,10 @@ import { isTMA, mockTelegramEnv } from '@telegram-apps/sdk';
  */
 export const initTelegramAdapter = () => {
     if (typeof window === 'undefined') return;
+    console.log('[TMA] initTelegramAdapter starting...');
 
     if (!isTMA()) {
+        console.log('[TMA] Non-TMA environment detected, applying mocks...');
         // We pass launchParams as a query string for simpler type compliance.
         // Theme params are URL-encoded JSON.
         const themeParams = JSON.stringify({
@@ -36,5 +38,7 @@ export const initTelegramAdapter = () => {
 
         mockTelegramEnv({ launchParams: params });
         console.log('[TMA] Browser mode: Telegram environment mocked via official SDK utility.');
+    } else {
+        console.log('[TMA] Native TMA environment detected.');
     }
 };

@@ -26,7 +26,7 @@ services:
   # ─── Cloudflare Quick Tunnel → exposes Vite frontend via HTTPS ──────────────
   cloudflared:
     image: cloudflare/cloudflared:latest
-    command: tunnel --no-autoupdate --url http://app:5174
+    command: tunnel --no-autoupdate --protocol http2 --url http://app:5174
     depends_on:
       - app
     restart: unless-stopped

@@ -3,12 +3,14 @@ import Catalog from './pages/Catalog';
 import Product from './pages/Product';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+import DebugPage from './pages/DebugPage';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Catalog />} />
+        <Route path="/" element={<DebugPage />} />
+        <Route path="/catalog" element={<Catalog />} />
         <Route path="/p/:id" element={<Product />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
