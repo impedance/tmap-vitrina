@@ -2,58 +2,34 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TMA Debug v8</title>
-  <style>
-    body {
-      background: #000;
-      color: #fff;
-      margin: 0;
-      font-family: sans-serif;
-    }
-
-    #status {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      padding: 15px;
-      border-bottom: 1px solid #444;
-      z-index: 10000;
-      text-align: center;
-      font-size: 12px;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <title>Vite + React + TS</title>
+  <script>
+    window.addEventListener('error', function (event) {
+      var err = document.createElement('div');
+      err.style.cssText = 'position:fixed;top:0;left:0;right:0;background:red;color:white;z-index:9999;padding:10px;font-size:12px;max-height:50vh;overflow:auto;word-wrap:break-word;';
+      err.innerText = 'Error: ' + event.message + '\nFile:' + event.filename + ':' + event.lineno;
+      if (event.error && event.error.stack) err.innerText += '\nStack: ' + event.error.stack;
+      document.body.appendChild(err);
+    });
+    window.addEventListener('unhandledrejection', function (event) {
+      var err = document.createElement('div');
+      err.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:orange;color:white;z-index:9999;padding:10px;font-size:12px;max-height:50vh;overflow:auto;word-wrap:break-word;';
+      err.innerText = 'Unhandled Rejection: ' + (event.reason && event.reason.message ? event.reason.message : event.reason);
+      if (event.reason && event.reason.stack) err.innerText += '\nStack: ' + event.reason.stack;
+      document.body.appendChild(err);
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+  <script>eruda.init();</script>
 </head>
 
 <body>
-  <div id="status" style="background: #222;">[V8] LOADING...</div>
   <div id="root"></div>
-
-  <script>
-    console.log('[TMA] V8 Step 1: Inline Script');
-    document.getElementById('status').innerText = '[V8] 1: INLINE SCRIPT OK';
-    document.getElementById('status').style.background = '#660'; 
-  </script>
-
-  <script type="module">
-    console.log('[TMA] V8 Step 2: Inline Module');
-    document.getElementById('status').innerText = '[V8] 2: INLINE MODULE OK';
-    document.getElementById('status').style.background = 'blue';
-
-    // Simulate what main.tsx would do
-    document.body.style.background = 'magenta';
-    alert('V8: INLINE MODULE WORKS! (SIMULATING MAIN.TSX)');
-  </script>
-
-  <!-- IMPORTANT: COMMENTING OUT EXTERNAL MAIN TO SEE IF IT BLOCKS THE QUEUE -->
-  <!-- <script type="module" src="/src/main.tsx?v=888"></script> -->
-
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-  <script>eruda.init();</script>
+  <script type="module" src="/src/main.tsx"></script>
 </body>
 
 </html>
