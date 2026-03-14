@@ -1,4 +1,5 @@
-import prisma from '../src/utils/prisma';
+import { db } from '../src/utils/db';
+import { products } from '../src/drizzle/schema';
 import {
     createProduct,
     deleteProduct,
@@ -6,6 +7,7 @@ import {
     getProductById,
     updateProduct
 } from '../src/controllers/products';
+import { eq } from 'drizzle-orm';
 
 type MockRes = {
     statusCode: number;
@@ -37,11 +39,11 @@ const createMockRes = (): MockRes => {
 
 describe('Products controller', () => {
     beforeAll(async () => {
-        await prisma.product.deleteMany();
+        await db.delete(products);
     });
 
     afterAll(async () => {
-        await prisma.$disconnect();
+        // No need to disconnect for SQLite
     });
 
     it('should create a new product', async () => {

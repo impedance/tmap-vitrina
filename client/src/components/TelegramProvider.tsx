@@ -1,17 +1,27 @@
 import React, { useEffect, useState, useRef } from 'react';
 import {
     init,
-    isTMA,
     miniApp,
     themeParams,
     viewport,
     backButton,
 } from '@telegram-apps/sdk-react';
 
+/**
+ * Check if we're running inside the actual Telegram WebApp (not just with the script loaded).
+ * Returns true only if Telegram.WebApp exists AND has valid initData (meaning we're actually in Telegram).
+ */
+const isActualTelegramEnv = (): boolean => {
+    if (typeof window === 'undefined') return false;
+    
+    // Check if Telegram WebApp object exists and has initData (real Telegram env)
+    const tg = (window as unknown as { Telegram?: { WebApp?: { initData?: string } } }).Telegram;
+    return !!(tg?.WebApp?.initData);
+};
+
 export const TelegramProvider = ({ children }: { children: React.ReactNode }) => {
-    // Check if we log inside the telegram app or browser. 
-    // We can use isTMA() directly since it checks the environment synchronous.
-    const isTelegramEnv = isTMA();
+    // Check if we log inside the telegram app or browser.
+    const isTelegramEnv = isActualTelegramEnv();
     const [isReady, setIsReady] = useState(false);
     const didInit = useRef(false);
 

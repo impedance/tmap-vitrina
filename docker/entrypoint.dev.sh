@@ -1,12 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
-echo "🔧 Generating Prisma client..."
+echo "🗄️  Pushing database schema with Drizzle..."
 cd /app/server
-npx prisma generate
-
-echo "🗄️  Pushing database schema..."
-npx prisma db push --accept-data-loss
+npx drizzle-kit push
 
 echo "🚀 Starting dev servers..."
 cd /app

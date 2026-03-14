@@ -59,9 +59,9 @@ lint:
 test:
 	npm test --prefix server
 
-# Prisma seed (ts-node prisma/seed.ts)
+# Drizzle seed (ts-node drizzle/seed.ts)
 seed:
-	cd server && npx prisma db seed
+	cd server && npx ts-node drizzle/seed.ts
 
 # Удаляет зависимости и артефакты сборки
 clean:

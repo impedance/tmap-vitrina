@@ -1,4 +1,16 @@
-import { isTMA, mockTelegramEnv } from '@telegram-apps/sdk';
+import { mockTelegramEnv } from '@telegram-apps/sdk';
+
+/**
+ * Check if we're running inside the actual Telegram WebApp (not just with the script loaded).
+ * Returns true only if Telegram.WebApp exists AND has valid initData (meaning we're actually in Telegram).
+ */
+const isActualTelegramEnv = (): boolean => {
+    if (typeof window === 'undefined') return false;
+    
+    // Check if Telegram WebApp object exists and has initData (real Telegram env)
+    const tg = (window as unknown as { Telegram?: { WebApp?: { initData?: string } } }).Telegram;
+    return !!(tg?.WebApp?.initData);
+};
 
 /**
  * Initializes a mock Telegram Mini App environment using the official SDK utility.
@@ -11,7 +23,8 @@ import { isTMA, mockTelegramEnv } from '@telegram-apps/sdk';
 export const initTelegramAdapter = () => {
     if (typeof window === 'undefined') return;
 
-    if (!isTMA()) {
+    // Only mock if we're NOT in actual Telegram (check for real initData, not just script presence)
+    if (!isActualTelegramEnv()) {
         // We pass launchParams as a query string for simpler type compliance.
         // Theme params are URL-encoded JSON.
         const themeParams = JSON.stringify({
@@ -36,5 +49,7 @@ export const initTelegramAdapter = () => {
 
         mockTelegramEnv({ launchParams: params });
         console.log('[TMA] Browser mode: Telegram environment mocked via official SDK utility.');
+    } else {
+        console.log('[TMA] Running in actual Telegram environment, skipping mock.');
     }
 };
