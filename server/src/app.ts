@@ -11,6 +11,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/assets', express.static(path.join(__dirname, '../../client/public/assets')));
 
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);

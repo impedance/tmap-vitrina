@@ -6,16 +6,16 @@ const DATABASE_URL = process.env.DATABASE_URL || 'file:/app/data/prod.db';
 
 export async function initDatabase() {
     const client = createClient({ url: DATABASE_URL });
-    
+
     try {
         // Check if tables exist
         const result = await client.execute(`
             SELECT name FROM sqlite_master WHERE type='table' AND name='Product'
         `);
-        
+
         if (result.rows.length === 0) {
             console.log('🔧 Initializing database...');
-            
+
             // Create tables
             await client.execute(`
                 CREATE TABLE IF NOT EXISTS "Product" (
@@ -42,7 +42,7 @@ export async function initDatabase() {
                     updatedAt TEXT NOT NULL
                 )
             `);
-            
+
             await client.execute(`
                 CREATE TABLE IF NOT EXISTS "Order" (
                     id TEXT PRIMARY KEY,
@@ -58,11 +58,16 @@ export async function initDatabase() {
                     createdAt TEXT NOT NULL
                 )
             `);
-            
-            // Seed initial products
-            const db = drizzle(client, { schema });
+        }
+
+        // Seed initial products if table is empty
+        const db = drizzle(client, { schema });
+        const existingProduct = await db.select().from(schema.products).get();
+
+        if (!existingProduct) {
+            console.log('🌱 Seeding database...');
             const now = new Date().toISOString();
-            
+
             const products = [
                 {
                     id: '550e8400-e29b-41d4-a716-446655440001',
@@ -72,7 +77,7 @@ export async function initDatabase() {
                     currency: 'RUB',
                     weightLabel: '60 г',
                     badges: '["Vegan","Новинка"]',
-                    images: '["/samples/amazing/ashaninka.png"]',
+                    images: '["/assets/products/ashaninka.webp"]',
                     collection: 'Классическая серия',
                     features: '["Перу","70% какао"]',
                     kind: 'Плитка',
@@ -95,7 +100,7 @@ export async function initDatabase() {
                     currency: 'RUB',
                     weightLabel: '60 г',
                     badges: '["Vegan","Обладатель премий"]',
-                    images: '["/samples/amazing/chunchoqin.jpg"]',
+                    images: '["/assets/products/chunchoqin.webp"]',
                     collection: 'Классическая серия',
                     features: '["Перу","80% какао","Award winner"]',
                     kind: 'Плитка',
@@ -118,7 +123,7 @@ export async function initDatabase() {
                     currency: 'RUB',
                     weightLabel: '60 г',
                     badges: '["Новинка"]',
-                    images: '["/samples/amazing/white_gold.png"]',
+                    images: '["/assets/products/white_gold.webp"]',
                     collection: 'Шоколад с начинками',
                     features: '["Мадагаскар","Белый шоколад"]',
                     kind: 'Плитка',
@@ -141,7 +146,7 @@ export async function initDatabase() {
                     currency: 'RUB',
                     weightLabel: '60 г',
                     badges: '["Vegan","Без сахара"]',
-                    images: '["/samples/amazing/guayas_milk.png"]',
+                    images: '["/assets/products/guayas_milk.webp"]',
                     collection: 'Детская серия',
                     features: '["Эквадор","Молочный","Без сахара"]',
                     kind: 'Плитка',
@@ -157,12 +162,12 @@ export async function initDatabase() {
                     updatedAt: now
                 }
             ];
-            
+
             for (const product of products) {
                 await db.insert(schema.products).values(product);
                 console.log(`  ✅ Added: ${product.title}`);
             }
-            
+
             console.log('🎉 Database initialized with 4 products');
         } else {
             console.log('✅ Database already initialized');
