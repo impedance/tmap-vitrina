@@ -56,13 +56,6 @@ COPY --from=builder /app/server/node_modules ./server/node_modules
 # Copy Drizzle schema (needed for runtime)
 COPY --from=builder /app/server/src/drizzle ./server/drizzle
 
-# Copy seed script (compiled)
-COPY --from=builder /app/server/dist/drizzle/seed.js ./server/dist/drizzle/seed.js
-
-# Copy database init script
-COPY --from=builder /app/server/scripts/init-db.sh ./server/scripts/init-db.sh
-RUN chmod +x /app/server/scripts/init-db.sh
-
 # Create directories for persistent data
 RUN mkdir -p /app/data /app/server/uploads
 
