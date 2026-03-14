@@ -1,0 +1,77 @@
+# Stage 1: Build - Install all dependencies and build the project
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+# Install system tools needed for build
+RUN apk add --no-cache bash python3 make g++
+
+# Copy root package files
+COPY package.json package-lock.json* ./
+
+# Install root-level dependencies (concurrently)
+RUN npm ci --ignore-scripts
+
+# Copy and install client dependencies
+COPY client/package.json client/package-lock.json* ./client/
+RUN npm ci --prefix client --ignore-scripts
+
+# Copy and install server dependencies
+COPY server/package.json server/package-lock.json* ./server/
+RUN npm ci --prefix server --ignore-scripts
+
+# Copy all source code
+COPY . .
+
+# Set temporary DATABASE_URL for Drizzle generation
+ENV DATABASE_URL="file:./dev.db"
+
+# Build the client (Vite build + TypeScript)
+RUN npm run build --prefix client
+
+# Build the server (TypeScript compile)
+RUN npm run build --prefix server
+
+# Remove dev dependencies and reinstall only production ones
+RUN cd server && rm -rf node_modules && npm install --omit=dev --ignore-scripts
+
+# Stage 2: Runtime - Production-only image
+FROM node:22-alpine AS runtime
+
+WORKDIR /app
+
+# Install wget for healthcheck
+RUN apk add --no-cache wget
+
+# Copy built server files
+COPY --from=builder /app/server/dist ./server/dist
+COPY --from=builder /app/server/package.json ./server/
+
+# Copy built client files
+COPY --from=builder /app/client/dist ./client/dist
+
+# Copy only production dependencies (not devDependencies)
+COPY --from=builder /app/server/node_modules ./server/node_modules
+
+# Copy Drizzle schema (needed for runtime)
+COPY --from=builder /app/server/src/drizzle ./server/drizzle
+
+# Copy seed script (compiled)
+COPY --from=builder /app/server/dist/drizzle/seed.js ./server/dist/drizzle/seed.js
+
+# Copy database init script
+COPY --from=builder /app/server/scripts/init-db.sh ./server/scripts/init-db.sh
+RUN chmod +x /app/server/scripts/init-db.sh
+
+# Create directories for persistent data
+RUN mkdir -p /app/data /app/server/uploads
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=3002
+
+# Expose the API port
+EXPOSE 3002
+
+# Add seed command
+CMD ["node", "server/dist/index.js"]
